@@ -1,0 +1,93 @@
+# check_typo.py
+# 简单的文章错别字检查工具
+
+import re
+
+# 常见错别字库（可扩展）
+TYPO_DICT = {
+    "的": ["得", "地"],  # 需要结合语境判断
+    "在": ["再"],
+    "做": ["作"],
+    "像": ["象"],
+    "已": ["以"],
+    "即": ["既"],
+    "键": ["健"],
+    "练": ["炼"],
+}
+
+# 易混淆词
+CONFUSE_WORDS = [
+    ("权利", "权力"),
+    ("反映", "反应"),
+    ("截止", "截至"),
+    ("制定", "制订"),
+    ("爆发", "暴发"),
+]
+
+
+def check_simple_typo(text):
+    """检查常见错别字"""
+    issues = []
+    
+    for wrong, rights in TYPO_DICT.items():
+        if wrong in text:
+            # 简单统计，实际需结合语境
+            count = text.count(wrong)
+            issues.append(f"'{wrong}' 出现 {count} 次，注意是否为 {rights}")
+    
+    return issues
+
+
+def check_confuse_words(text):
+    """检查易混淆词"""
+    issues = []
+    
+    for w1, w2 in CONFUSE_WORDS:
+        if w1 in text or w2 in text:
+            issues.append(f"注意区分：'{w1}' vs '{w2}'")
+    
+    return issues
+
+
+def check_punctuation(text):
+    """检查标点符号"""
+    issues = []
+    
+    # 检查连续标点
+    if re.search(r'[，。！？]{2,}', text):
+        issues.append("发现连续标点符号")
+    
+    # 检查中英文标点混用
+    if re.search(r'[，。！？；：""''（）]', text) and re.search(r'[,.!?;:\'"\(\)]', text):
+        issues.append("中英文标点混用")
+    
+    return issues
+
+
+def main():
+    # 读取文章
+    with open("article.txt", "r", encoding="utf-8") as f:
+        text = f.read()
+    
+    print("=" * 40)
+    print("文章错别字检查报告")
+    print("=" * 40)
+    
+    all_issues = []
+    all_issues.extend(check_simple_typo(text))
+    all_issues.extend(check_confuse_words(text))
+    all_issues.extend(check_punctuation(text))
+    
+    if all_issues:
+        for i, issue in enumerate(all_issues, 1):
+            print(f"{i}. {issue}")
+    else:
+        print("未发现明显问题")
+    
+    print("=" * 40)
+    print(f"文章总字数：{len(text)}")
+    print("提示：本工具为辅助检查，最终判断需人工确认")
+
+
+if __name__ == "__main__":
+    main()
